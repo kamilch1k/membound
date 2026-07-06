@@ -8,5 +8,8 @@ if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
 endif()
 
 add_executable(membound src/main.cu)
+add_executable(membound-softmax src/softmax.cu)
 # -lineinfo: source-level correlation in Nsight Compute
-target_compile_options(membound PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3 -lineinfo --expt-relaxed-constexpr>)
+foreach(t membound membound-softmax)
+  target_compile_options(${t} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3 -lineinfo --expt-relaxed-constexpr>)
+endforeach()

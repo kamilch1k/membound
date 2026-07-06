@@ -1,9 +1,10 @@
 # membound
 
-Hand-written **FP16 GEMV CUDA kernels** pushed to **99.6% of measured memory
-bandwidth**, profiled with Nsight Compute at every stage. Zero dependencies
-beyond the CUDA toolkit; every benchmarked kernel is correctness-checked
-against a double-precision reference on every run.
+Hand-written **FP16 GEMV and online-softmax CUDA kernels** pushed to **99.6%
+and 98.1% of measured memory bandwidth**, profiled with Nsight Compute at
+every stage. Zero dependencies beyond the CUDA toolkit; every benchmarked
+kernel is correctness-checked against a double-precision reference on every
+run.
 
 ```
 pure-read ceiling (max of before/after): 419.4 GB/s  = MBU denominator
@@ -93,6 +94,38 @@ impossible numbers first, and the fix is in the methodology:
    ceiling before *and* after the suite and normalizes by the max, so the
    denominator reflects the same sustained clock the kernels enjoy.
 
+## Bonus kernel: online softmax
+
+`src/softmax.cu` — the other memory-bound decode kernel, same treatment.
+A fused kernel computes **max and sum in a single sweep** with the online
+update (`m' = max(m,x); d = d·e^(m−m') + e^(x−m')`, Milakov & Gimelshein),
+then normalizes in a second pass that re-reads the row through L2. Floor
+traffic is one read + one write per element — a balanced stream — so the MBU
+denominator here is the measured **copy** ceiling, not pure-read (using GEMV's
+read ceiling would flatter the number; the denominator has to match the
+traffic mix).
+
+| shape        | kernel | ms      | GB/s  | MBU%     |
+|--------------|--------|---------|-------|----------|
+| 8192×8192    | naive  | 6.7575  | 39.7  | 10.8     |
+| 8192×8192    | online | 0.7433  | 361.1 | **98.1** |
+| 4096×32768   | naive  | 17.6985 | 30.3  | 8.2      |
+| 4096×32768   | online | 1.7674  | 303.8 | 82.6     |
+| 1024×131072  | naive  | 70.8439 | 7.6   | 2.1      |
+| 1024×131072  | online | 2.1622  | 248.3 | 67.5     |
+
+The falloff at 131072-wide rows is not noise — it is L2 capacity, and it is
+quantitatively predictable: 256 KB rows × ~232 resident blocks ≈ 59 MB > 48 MB
+of L2, so pass 2's re-read spills to DRAM and the kernel pays ~3 passes
+against a 2-pass floor → predicted 2/3 = 66.7% MBU, measured 67.5%. (Upgrade
+path if vocab-width rows mattered: split each row across blocks so the
+per-chunk working set fits L2, at the cost of a two-level reduction.)
+
+Also caught by the correctness gate: FP16 softmax outputs below ~6e-5 are
+subnormal, where relative precision collapses by construction — the error
+metric scores relative to `max(ref, 1e-4)` so real errors fail loudly while
+subnormal rounding noise doesn't produce false alarms.
+
 ## Correctness
 
 Every kernel is checked against a double-precision CPU reference **on every
@@ -108,8 +141,9 @@ Requires the CUDA toolkit (13.x) and a C++20 host compiler.
 ```sh
 cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
-./build/membound              # benchmark + correctness
+./build/membound              # GEMV benchmark + correctness
 ./build/membound --profile    # each kernel launches exactly once, for ncu
+./build/membound-softmax      # softmax benchmark + correctness
 ```
 
 Profiling (GPU perf counters need admin on Windows, or the driver toggle):
