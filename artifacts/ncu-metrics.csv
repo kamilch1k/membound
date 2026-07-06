@@ -1,0 +1,69 @@
+==PROF== Connected to process 23688 (C:\cc\membound\build\membound.exe)
+==PROF== Disconnected from process 23688
+device: NVIDIA GeForce RTX 4080 Laptop GPU  (sm_89, 58 SMs, 12.0 GB)
+4096x4096 naive: correct (max rel err 3.12e-05), launched once for ncu
+4096x4096 warp: correct (max rel err 9.03e-06), launched once for ncu
+4096x4096 vec: correct (max rel err 1.02e-05), launched once for ncu
+
+8192x8192 naive: correct (max rel err 8.14e-05), launched once for ncu
+8192x8192 warp: correct (max rel err 2.50e-05), launched once for ncu
+8192x8192 vec: correct (max rel err 1.86e-05), launched once for ncu
+
+14336x4096 naive: correct (max rel err 4.37e-05), launched once for ncu
+14336x4096 warp: correct (max rel err 1.19e-05), launched once for ncu
+14336x4096 vec: correct (max rel err 1.04e-05), launched once for ncu
+
+4096x14336 naive: correct (max rel err 1.27e-04), launched once for ncu
+4096x14336 warp: correct (max rel err 2.58e-05), launched once for ncu
+4096x14336 vec: correct (max rel err 2.33e-05), launched once for ncu
+
+done. all kernels passed the double-precision correctness check.
+"ID","Process ID","Process Name","Host Name","Kernel Name","Context","Stream","Block Size","Grid Size","Device","CC","Section Name","Metric Name","Metric Unit","Metric Value"
+"0","23688","membound.exe","127.0.0.1","gemv_naive(const __half *, const __half *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","16.27"
+"0","23688","membound.exe","127.0.0.1","gemv_naive(const __half *, const __half *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","16.50"
+"0","23688","membound.exe","127.0.0.1","gemv_naive(const __half *, const __half *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","0.94"
+"0","23688","membound.exe","127.0.0.1","gemv_naive(const __half *, const __half *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","16.65"
+"1","23688","membound.exe","127.0.0.1","gemv_warp(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","89.21"
+"1","23688","membound.exe","127.0.0.1","gemv_warp(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","2"
+"1","23688","membound.exe","127.0.0.1","gemv_warp(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","3.02"
+"1","23688","membound.exe","127.0.0.1","gemv_warp(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","84.33"
+"2","23688","membound.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","95.99"
+"2","23688","membound.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","16"
+"2","23688","membound.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","1.91"
+"2","23688","membound.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","81.28"
+"3","23688","membound.exe","127.0.0.1","gemv_naive(const __half *, const __half *, float *, int, int)","1","7","(256, 1, 1)","(32, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","21.95"
+"3","23688","membound.exe","127.0.0.1","gemv_naive(const __half *, const __half *, float *, int, int)","1","7","(256, 1, 1)","(32, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","16.50"
+"3","23688","membound.exe","127.0.0.1","gemv_naive(const __half *, const __half *, float *, int, int)","1","7","(256, 1, 1)","(32, 1, 1)","0","8.9","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","1.99"
+"3","23688","membound.exe","127.0.0.1","gemv_naive(const __half *, const __half *, float *, int, int)","1","7","(256, 1, 1)","(32, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","15.68"
+"4","23688","membound.exe","127.0.0.1","gemv_warp(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1024, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","93.81"
+"4","23688","membound.exe","127.0.0.1","gemv_warp(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1024, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","2"
+"4","23688","membound.exe","127.0.0.1","gemv_warp(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1024, 1, 1)","0","8.9","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","2.43"
+"4","23688","membound.exe","127.0.0.1","gemv_warp(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1024, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","97.87"
+"5","23688","membound.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1024, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","96.93"
+"5","23688","membound.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1024, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","16"
+"5","23688","membound.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1024, 1, 1)","0","8.9","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","0.95"
+"5","23688","membound.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1024, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","95.47"
+"6","23688","membound.exe","127.0.0.1","gemv_naive(const __half *, const __half *, float *, int, int)","1","7","(256, 1, 1)","(56, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","25.88"
+"6","23688","membound.exe","127.0.0.1","gemv_naive(const __half *, const __half *, float *, int, int)","1","7","(256, 1, 1)","(56, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","16.50"
+"6","23688","membound.exe","127.0.0.1","gemv_naive(const __half *, const __half *, float *, int, int)","1","7","(256, 1, 1)","(56, 1, 1)","0","8.9","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","0.75"
+"6","23688","membound.exe","127.0.0.1","gemv_naive(const __half *, const __half *, float *, int, int)","1","7","(256, 1, 1)","(56, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","16.26"
+"7","23688","membound.exe","127.0.0.1","gemv_warp(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1792, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","94.05"
+"7","23688","membound.exe","127.0.0.1","gemv_warp(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1792, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","2"
+"7","23688","membound.exe","127.0.0.1","gemv_warp(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1792, 1, 1)","0","8.9","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","2.50"
+"7","23688","membound.exe","127.0.0.1","gemv_warp(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1792, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","98.89"
+"8","23688","membound.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1792, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","96.60"
+"8","23688","membound.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1792, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","16.00"
+"8","23688","membound.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1792, 1, 1)","0","8.9","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","0.85"
+"8","23688","membound.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1792, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","94.56"
+"9","23688","membound.exe","127.0.0.1","gemv_naive(const __half *, const __half *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","18.41"
+"9","23688","membound.exe","127.0.0.1","gemv_naive(const __half *, const __half *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","16.50"
+"9","23688","membound.exe","127.0.0.1","gemv_naive(const __half *, const __half *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","5.48"
+"9","23688","membound.exe","127.0.0.1","gemv_naive(const __half *, const __half *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","16.47"
+"10","23688","membound.exe","127.0.0.1","gemv_warp(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","88.71"
+"10","23688","membound.exe","127.0.0.1","gemv_warp(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","2"
+"10","23688","membound.exe","127.0.0.1","gemv_warp(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","2.84"
+"10","23688","membound.exe","127.0.0.1","gemv_warp(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","82.71"
+"11","23688","membound.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","96.62"
+"11","23688","membound.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","16.00"
+"11","23688","membound.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","1.67"
+"11","23688","membound.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","88.75"

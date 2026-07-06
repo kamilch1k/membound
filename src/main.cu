@@ -173,7 +173,10 @@ static double check(const std::vector<float>& got, const std::vector<double>& re
     return worst;
 }
 
-int main() {
+int main(int argc, char** argv) {
+    // --profile: launch each kernel exactly once per shape (correctness-checked,
+    // no probes, no timing loops) so `ncu` can profile every launch quickly.
+    const bool profile_mode = argc > 1 && std::string(argv[1]) == "--profile";
     cudaDeviceProp prop{};
     CUDA_CHECK(cudaGetDeviceProperties(&prop, 0));
     std::printf("device: %s  (sm_%d%d, %d SMs, %.1f GB)\n",
@@ -181,33 +184,41 @@ int main() {
                 prop.totalGlobalMem / (1024.0 * 1024.0 * 1024.0));
 
     // ---- ceiling probes (256 MiB working set) ----
-    const size_t probe_bytes = 256ull << 20;
-    const size_t n4 = probe_bytes / sizeof(float4);
-    float4 *psrc, *pdst;
-    float* psink;
-    CUDA_CHECK(cudaMalloc(&psrc, probe_bytes));
-    CUDA_CHECK(cudaMalloc(&pdst, probe_bytes));
-    CUDA_CHECK(cudaMalloc(&psink, sizeof(float)));
-    CUDA_CHECK(cudaMemset(psrc, 1, probe_bytes));
-
-    const int pblocks = prop.multiProcessorCount * 8;
-    Timing tc = time_kernel([&] { copy_kernel<<<pblocks, 256>>>(psrc, pdst, n4); });
-    Timing tr = time_kernel([&] { read_kernel<<<pblocks, 256>>>(psrc, psink, n4); });
-    CUDA_CHECK(cudaGetLastError());
-    const double copy_gbs = 2.0 * probe_bytes / (tc.ms * 1e-3) / 1e9;
-    const double read_gbs = 1.0 * probe_bytes / (tr.ms * 1e-3) / 1e9;
-    std::printf("measured ceiling:  copy %.1f GB/s   pure-read %.1f GB/s   (MBU denominator = pure-read)\n\n",
-                copy_gbs, read_gbs);
-    CUDA_CHECK(cudaFree(psrc));
-    CUDA_CHECK(cudaFree(pdst));
-    CUDA_CHECK(cudaFree(psink));
+    // A laptop GPU's clocks drift with power/thermal state, so a single ceiling
+    // sample can be measured at a different clock than the kernels it normalizes
+    // (that's how you get "104% MBU"). Measure the pure-read ceiling before AND
+    // after the whole suite and use the max: the denominator then reflects the
+    // best sustained clock, which is also what the kernels reach mid-run.
+    auto read_ceiling = [&](bool report_copy) -> double {
+        const size_t probe_bytes = 256ull << 20;
+        const size_t n4 = probe_bytes / sizeof(float4);
+        float4 *psrc, *pdst = nullptr;
+        float* psink;
+        CUDA_CHECK(cudaMalloc(&psrc, probe_bytes));
+        CUDA_CHECK(cudaMalloc(&psink, sizeof(float)));
+        CUDA_CHECK(cudaMemset(psrc, 1, probe_bytes));
+        const int pblocks = prop.multiProcessorCount * 8;
+        if (report_copy) {
+            CUDA_CHECK(cudaMalloc(&pdst, probe_bytes));
+            Timing tc = time_kernel([&] { copy_kernel<<<pblocks, 256>>>(psrc, pdst, n4); });
+            std::printf("copy ceiling: %.1f GB/s\n", 2.0 * probe_bytes / (tc.ms * 1e-3) / 1e9);
+            CUDA_CHECK(cudaFree(pdst));
+        }
+        Timing tr = time_kernel([&] { read_kernel<<<pblocks, 256>>>(psrc, psink, n4); });
+        CUDA_CHECK(cudaGetLastError());
+        CUDA_CHECK(cudaFree(psrc));
+        CUDA_CHECK(cudaFree(psink));
+        return probe_bytes / (tr.ms * 1e-3) / 1e9;
+    };
+    double read_gbs = 1.0; // MBU denominator; finalized after the suite runs
+    if (!profile_mode) read_gbs = read_ceiling(true);
 
     // ---- GEMV shapes: typical decode projections (Llama-ish) ----
     struct Shape { int M, N; };
     const Shape shapes[] = {{4096, 4096}, {8192, 8192}, {14336, 4096}, {4096, 14336}};
 
-    std::printf("%-12s %-7s %10s %10s %8s %10s   %s\n",
-                "shape", "kernel", "ms", "GB/s", "MBU%", "GFLOP/s", "max-rel-err");
+    struct Row { int M, N; const char* name; float ms; double gbs, gflops, err; };
+    std::vector<Row> rows;
 
     for (const Shape s : shapes) {
         const int M = s.M, N = s.N;
@@ -263,11 +274,14 @@ int main() {
                 std::fprintf(stderr, "%s FAILED correctness: max rel err %.3g\n", name, err);
                 std::exit(1);
             }
+            if (profile_mode) {
+                std::printf("%dx%d %s: correct (max rel err %.2e), launched once for ncu\n",
+                            M, N, name, err);
+                return;
+            }
             const Timing t = time_kernel(launch);
             const double gbs = bytes / (t.ms * 1e-3) / 1e9;
-            std::printf("%-12s %-7s %10.4f %10.1f %8.1f %10.1f   %.2e\n",
-                        (std::to_string(M) + "x" + std::to_string(N)).c_str(), name,
-                        t.ms, gbs, 100.0 * gbs / read_gbs, flops / (t.ms * 1e-3) / 1e9, err);
+            rows.push_back({M, N, name, t.ms, gbs, flops / (t.ms * 1e-3) / 1e9, err});
         };
 
         bench("naive", [&] { gemv_naive<<<(M + 255) / 256, 256>>>(nextA(), dx, dy, M, N); });
@@ -277,9 +291,24 @@ int main() {
         CUDA_CHECK(cudaFree(dA));
         CUDA_CHECK(cudaFree(dx));
         CUDA_CHECK(cudaFree(dy));
-        std::printf("\n");
+        if (profile_mode) std::printf("\n");
     }
 
-    std::printf("done. all kernels passed the double-precision correctness check.\n");
+    if (!profile_mode) {
+        read_gbs = std::max(read_gbs, read_ceiling(false));
+        std::printf("pure-read ceiling (max of before/after): %.1f GB/s  = MBU denominator\n\n", read_gbs);
+        std::printf("%-12s %-7s %10s %10s %8s %10s   %s\n",
+                    "shape", "kernel", "ms", "GB/s", "MBU%", "GFLOP/s", "max-rel-err");
+        long long prevShape = rows.empty() ? 0 : (long long)rows.front().M << 20 | rows.front().N;
+        for (const Row& r : rows) {
+            const long long shape = (long long)r.M << 20 | r.N;
+            if (shape != prevShape) { std::printf("\n"); prevShape = shape; }
+            std::printf("%-12s %-7s %10.4f %10.1f %8.1f %10.1f   %.2e\n",
+                        (std::to_string(r.M) + "x" + std::to_string(r.N)).c_str(), r.name,
+                        r.ms, r.gbs, 100.0 * r.gbs / read_gbs, r.gflops, r.err);
+        }
+    }
+
+    std::printf("\ndone. all kernels passed the double-precision correctness check.\n");
     return 0;
 }
