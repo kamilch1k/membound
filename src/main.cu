@@ -230,13 +230,24 @@ int main() {
             ref[i] = acc;
         }
 
+        // Ada's L2 is large (~48 MB): a matrix that fits stays cache-resident across
+        // timed iterations and you end up benchmarking L2, not DRAM (first run of
+        // 4096x4096 "achieved" 1.7 TB/s = 4x the card's bandwidth). Real decode
+        // streams weights through DRAM, so cycle through >=256 MB of identical
+        // copies of A — every iteration reads cold data. x stays hot (realistic:
+        // activations are small and cached).
+        const size_t bytesA  = (size_t)M * N * sizeof(__half);
+        const int    ncopies = (int)std::max<size_t>(1, ((256ull << 20) + bytesA - 1) / bytesA);
         __half *dA, *dx;
         float* dy;
-        CUDA_CHECK(cudaMalloc(&dA, (size_t)M * N * sizeof(__half)));
+        CUDA_CHECK(cudaMalloc(&dA, bytesA * ncopies));
         CUDA_CHECK(cudaMalloc(&dx, (size_t)N * sizeof(__half)));
         CUDA_CHECK(cudaMalloc(&dy, (size_t)M * sizeof(float)));
-        CUDA_CHECK(cudaMemcpy(dA, hA.data(), (size_t)M * N * sizeof(__half), cudaMemcpyHostToDevice));
+        for (int c = 0; c < ncopies; ++c)
+            CUDA_CHECK(cudaMemcpy(dA + c * (size_t)M * N, hA.data(), bytesA, cudaMemcpyHostToDevice));
         CUDA_CHECK(cudaMemcpy(dx, hx.data(), (size_t)N * sizeof(__half), cudaMemcpyHostToDevice));
+        size_t iter = 0;
+        auto nextA = [&]() -> const __half* { return dA + (iter++ % ncopies) * (size_t)M * N; };
 
         const double bytes  = (double)M * N * 2 + N * 2 + M * 4;
         const double flops  = 2.0 * M * N;
@@ -259,9 +270,9 @@ int main() {
                         t.ms, gbs, 100.0 * gbs / read_gbs, flops / (t.ms * 1e-3) / 1e9, err);
         };
 
-        bench("naive", [&] { gemv_naive<<<(M + 255) / 256, 256>>>(dA, dx, dy, M, N); });
-        bench("warp",  [&] { gemv_warp<<<(M + 7) / 8, dim3(32, 8)>>>(dA, dx, dy, M, N); });
-        bench("vec",   [&] { gemv_vec<<<(M + 7) / 8, dim3(32, 8)>>>(dA, dx, dy, M, N); });
+        bench("naive", [&] { gemv_naive<<<(M + 255) / 256, 256>>>(nextA(), dx, dy, M, N); });
+        bench("warp",  [&] { gemv_warp<<<(M + 7) / 8, dim3(32, 8)>>>(nextA(), dx, dy, M, N); });
+        bench("vec",   [&] { gemv_vec<<<(M + 7) / 8, dim3(32, 8)>>>(nextA(), dx, dy, M, N); });
 
         CUDA_CHECK(cudaFree(dA));
         CUDA_CHECK(cudaFree(dx));
