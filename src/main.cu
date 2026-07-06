@@ -264,13 +264,12 @@ int main(int argc, char** argv) {
         const double flops  = 2.0 * M * N;
         std::vector<float> out(M);
 
-        struct K { const char* name; void (*run)(const __half*, const __half*, float*, int, int, cudaStream_t); };
         auto bench = [&](const char* name, auto&& launch) {
             launch(); // once for correctness
             CUDA_CHECK(cudaGetLastError());
             CUDA_CHECK(cudaMemcpy(out.data(), dy, M * sizeof(float), cudaMemcpyDeviceToHost));
             const double err = check(out, ref);
-            if (err > 1e-2) {
+            if (err > 1e-3) {
                 std::fprintf(stderr, "%s FAILED correctness: max rel err %.3g\n", name, err);
                 std::exit(1);
             }
@@ -292,11 +291,24 @@ int main(int argc, char** argv) {
         CUDA_CHECK(cudaFree(dx));
         CUDA_CHECK(cudaFree(dy));
         if (profile_mode) std::printf("\n");
+
+        // re-probe the ceiling after every shape: laptop clocks drift within a
+        // suite, and the denominator must have seen the same best clock the
+        // kernels did or MBU can read >100%
+        if (!profile_mode) read_gbs = std::max(read_gbs, read_ceiling(false));
     }
 
     if (!profile_mode) {
         read_gbs = std::max(read_gbs, read_ceiling(false));
-        std::printf("pure-read ceiling (max of before/after): %.1f GB/s  = MBU denominator\n\n", read_gbs);
+        // The probe and the kernels sample different instants (and slightly
+        // different traffic mixes), so a kernel can beat the probe by ~1% of
+        // clock noise. An achieved rate is itself evidence of achievability:
+        // the denominator admits the best kernel rate, so MBU <= 100 by
+        // construction and 100.0 reads "at the measured limit".
+        const double probe_gbs = read_gbs;
+        for (const Row& r : rows) read_gbs = std::max(read_gbs, r.gbs);
+        std::printf("MBU denominator: %.1f GB/s  (pure-read probe %.1f, best-achieved %.1f)\n\n",
+                    read_gbs, probe_gbs, read_gbs);
         std::printf("%-12s %-7s %10s %10s %8s %10s   %s\n",
                     "shape", "kernel", "ms", "GB/s", "MBU%", "GFLOP/s", "max-rel-err");
         long long prevShape = rows.empty() ? 0 : (long long)rows.front().M << 20 | rows.front().N;

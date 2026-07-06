@@ -1,3 +1,5 @@
 build/
 .vs/
 *.ncu-rep
+artifacts/ncu-stderr.log
+artifacts/ncu-done.txt

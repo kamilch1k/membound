@@ -32,6 +32,7 @@
 #include <random>
 #include <string>
 #include <algorithm>
+#include <functional>
 
 #define CUDA_CHECK(call)                                                        \
     do {                                                                        \
@@ -89,7 +90,8 @@ __global__ void gemv_vec(const __half* __restrict__ A, const __half* __restrict_
 
 // Warp per row; each lane streams 16 int8 weights per 128-bit load (a full
 // row of FP16 x costs 2x the weight bytes here — x is hot in L2, weights are
-// the cold stream). Dequant is one int->float convert folded into the FMA.
+// the cold stream). Dequant is an I2F convert feeding an FMA, all in
+// registers — cheap ALU work hidden under the memory stream.
 __global__ void gemv_q8(const int8_t* __restrict__ A, const float* __restrict__ rowScale,
                         const __half* __restrict__ x, float* __restrict__ y, int M, int N) {
     const int lane = threadIdx.x;
@@ -327,34 +329,49 @@ int main(int argc, char** argv) {
 
         size_t itF = 0, it8 = 0, it4 = 0;
         std::vector<float> out(M);
-        float fp16_ms = 0.f;
-
-        auto bench = [&](const char* name, double bytes, const std::vector<double>& ref, auto&& launch) {
-            launch();
-            CUDA_CHECK(cudaGetLastError());
-            CUDA_CHECK(cudaMemcpy(out.data(), dy, M * 4, cudaMemcpyDeviceToHost));
-            const double err = check(out, ref);
-            if (err > 1e-2) {
-                std::fprintf(stderr, "%s FAILED correctness: max rel err %.3g\n", name, err);
-                std::exit(1);
-            }
-            if (profile_mode) {
-                std::printf("%dx%d %s: correct (max rel err %.2e), launched once for ncu\n", M, N, name, err);
-                return;
-            }
-            const Timing t = time_kernel(launch);
-            if (std::string(name) == "fp16") fp16_ms = t.ms;
-            rows.push_back({M, N, name, t.ms, bytes / (t.ms * 1e-3) / 1e9, err,
-                            fp16_ms > 0.f ? fp16_ms / t.ms : 1.f});
-        };
 
         const dim3 grid((M + 7) / 8), block(32, 8);
-        bench("fp16", (double)M * N * 2 + N * 2 + M * 4, refF,
-              [&] { gemv_vec<<<grid, block>>>(dF + (itF++ % cF) * (size_t)M * N, dx, dy, M, N); });
-        bench("q8", (double)M * N * 1 + M * 4 + N * 2 + M * 4, ref8,
-              [&] { gemv_q8<<<grid, block>>>(d8 + (it8++ % c8) * (size_t)M * N, ds8, dx, dy, M, N); });
-        bench("q4", (double)M * N / 2 + (double)M * groups * 2 + N * 2 + M * 4, ref4,
-              [&] { gemv_q4<<<grid, block>>>(d4 + (it4++ % c4) * (size_t)M * N / 2, ds4, dx, dy, M, N); });
+        struct Cand { const char* name; double bytes; const std::vector<double>* ref; std::function<void()> launch; };
+        const Cand cands[] = {
+            {"fp16", (double)M * N * 2 + N * 2 + M * 4, &refF,
+             [&] { gemv_vec<<<grid, block>>>(dF + (itF++ % cF) * (size_t)M * N, dx, dy, M, N); }},
+            {"q8", (double)M * N * 1 + M * 4 + N * 2 + M * 4, &ref8,
+             [&] { gemv_q8<<<grid, block>>>(d8 + (it8++ % c8) * (size_t)M * N, ds8, dx, dy, M, N); }},
+            {"q4", (double)M * N / 2 + (double)M * groups * 2 + N * 2 + M * 4, &ref4,
+             [&] { gemv_q4<<<grid, block>>>(d4 + (it4++ % c4) * (size_t)M * N / 2, ds4, dx, dy, M, N); }},
+        };
+
+        // correctness first — no kernel is timed unverified
+        double errs[3];
+        for (int k = 0; k < 3; ++k) {
+            cands[k].launch();
+            CUDA_CHECK(cudaGetLastError());
+            CUDA_CHECK(cudaMemcpy(out.data(), dy, M * 4, cudaMemcpyDeviceToHost));
+            errs[k] = check(out, *cands[k].ref);
+            if (errs[k] > 1e-3) {
+                std::fprintf(stderr, "%s FAILED correctness: max rel err %.3g\n", cands[k].name, errs[k]);
+                std::exit(1);
+            }
+            if (profile_mode)
+                std::printf("%dx%d %s: correct (max rel err %.2e), launched once for ncu\n",
+                            M, N, cands[k].name, errs[k]);
+        }
+
+        if (!profile_mode) {
+            // Timed in INTERLEAVED rounds, best round per kernel. The speedup
+            // column divides two kernels' times; timing them in separate
+            // blocks lets laptop clock drift land on one kernel and not the
+            // other (observed: fp16 in a throttle dip, q4 after recovery ->
+            // "5.9x", above the 3.76x compression cap, i.e. nonsense).
+            // Round-robin makes all three sample the same clock trajectory.
+            float best[3] = {1e30f, 1e30f, 1e30f};
+            for (int r = 0; r < 5; ++r)
+                for (int k = 0; k < 3; ++k)
+                    best[k] = std::min(best[k], time_kernel(cands[k].launch, r == 0 ? 10 : 2, 10).ms);
+            for (int k = 0; k < 3; ++k)
+                rows.push_back({M, N, cands[k].name, best[k],
+                                cands[k].bytes / (best[k] * 1e-3) / 1e9, errs[k], best[0] / best[k]});
+        }
 
         if (!profile_mode)
             std::printf("quantization rmse @ %dx%d:  q8 %.2e   q4 %.2e   (weights ~U[-1,1])\n",
@@ -373,7 +390,12 @@ int main(int argc, char** argv) {
     }
 
     if (!profile_mode) {
-        std::printf("\npure-read ceiling (max of before/after): %.1f GB/s  = MBU denominator\n\n", read_gbs);
+        // an achieved rate is itself evidence of achievability: the denominator
+        // admits the best kernel rate, so MBU <= 100 by construction
+        const double probe_gbs = read_gbs;
+        for (const Row& r : rows) read_gbs = std::max(read_gbs, r.gbs);
+        std::printf("\nMBU denominator: %.1f GB/s  (pure-read probe %.1f, best-achieved %.1f)\n\n",
+                    read_gbs, probe_gbs, read_gbs);
         std::printf("%-12s %-6s %10s %10s %8s %9s   %s\n",
                     "shape", "kernel", "ms", "GB/s", "MBU%", "x fp16", "max-rel-err");
         long long prevShape = 0;

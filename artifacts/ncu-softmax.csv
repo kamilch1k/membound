@@ -1,17 +1,3 @@
-==PROF== Connected to process 31916 (C:\cc\membound\build\membound-softmax.exe)
-==PROF== Disconnected from process 31916
-device: NVIDIA GeForce RTX 4080 Laptop GPU  (sm_89, 58 SMs, 12.0 GB)
-8192x8192 naive: correct (max rel err 4.91e-04), launched once for ncu
-8192x8192 online: correct (max rel err 4.88e-04), launched once for ncu
-
-4096x32768 naive: correct (max rel err 5.03e-04), launched once for ncu
-4096x32768 online: correct (max rel err 4.88e-04), launched once for ncu
-
-1024x131072 naive: correct (max rel err 3.08e-04), launched once for ncu
-1024x131072 online: correct (max rel err 2.98e-04), launched once for ncu
-
-
-done. all kernels passed the double-precision correctness check.
 "ID","Process ID","Process Name","Host Name","Kernel Name","Context","Stream","Block Size","Grid Size","Device","CC","Section Name","Metric Name","Metric Unit","Metric Value"
 "0","31916","membound-softmax.exe","127.0.0.1","softmax_naive(const __half *, __half *, int, int)","1","7","(256, 1, 1)","(32, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","18.49"
 "0","31916","membound-softmax.exe","127.0.0.1","softmax_naive(const __half *, __half *, int, int)","1","7","(256, 1, 1)","(32, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","32"

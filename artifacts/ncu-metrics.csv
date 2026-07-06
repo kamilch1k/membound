@@ -1,24 +1,3 @@
-==PROF== Connected to process 28012 (C:\cc\membound\build\membound.exe)
-==PROF== Disconnected from process 28012
-device: NVIDIA GeForce RTX 4080 Laptop GPU  (sm_89, 58 SMs, 12.0 GB)
-4096x4096 naive: correct (max rel err 3.12e-05), launched once for ncu
-4096x4096 warp: correct (max rel err 9.03e-06), launched once for ncu
-4096x4096 vec: correct (max rel err 1.02e-05), launched once for ncu
-
-8192x8192 naive: correct (max rel err 8.14e-05), launched once for ncu
-8192x8192 warp: correct (max rel err 2.50e-05), launched once for ncu
-8192x8192 vec: correct (max rel err 1.86e-05), launched once for ncu
-
-14336x4096 naive: correct (max rel err 4.37e-05), launched once for ncu
-14336x4096 warp: correct (max rel err 1.19e-05), launched once for ncu
-14336x4096 vec: correct (max rel err 1.04e-05), launched once for ncu
-
-4096x14336 naive: correct (max rel err 1.27e-04), launched once for ncu
-4096x14336 warp: correct (max rel err 2.58e-05), launched once for ncu
-4096x14336 vec: correct (max rel err 2.33e-05), launched once for ncu
-
-
-done. all kernels passed the double-precision correctness check.
 "ID","Process ID","Process Name","Host Name","Kernel Name","Context","Stream","Block Size","Grid Size","Device","CC","Section Name","Metric Name","Metric Unit","Metric Value"
 "0","28012","membound.exe","127.0.0.1","gemv_naive(const __half *, const __half *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","16.59"
 "0","28012","membound.exe","127.0.0.1","gemv_naive(const __half *, const __half *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","16.50"

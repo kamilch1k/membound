@@ -1,0 +1,15 @@
+name: ci
+on: [push, pull_request]
+
+# Build-only: GitHub runners have no GPU, so this compiles all three targets
+# with warnings-as-errors (nvcc -Werror all-warnings + host -Wall -Wextra
+# -Werror). The correctness suite (ctest) needs a GPU and runs locally.
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: nvidia/cuda:12.6.3-devel-ubuntu24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: apt-get update && apt-get install -y --no-install-recommends cmake ninja-build
+      - run: cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=Release
+      - run: cmake --build build
