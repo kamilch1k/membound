@@ -9,7 +9,8 @@ endif()
 
 add_executable(membound src/main.cu)
 add_executable(membound-softmax src/softmax.cu)
+add_executable(membound-dequant src/dequant.cu)
 # -lineinfo: source-level correlation in Nsight Compute
-foreach(t membound membound-softmax)
+foreach(t membound membound-softmax membound-dequant)
   target_compile_options(${t} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3 -lineinfo --expt-relaxed-constexpr>)
 endforeach()

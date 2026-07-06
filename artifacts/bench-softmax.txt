@@ -1,0 +1,14 @@
+device: NVIDIA GeForce RTX 4080 Laptop GPU  (sm_89, 58 SMs, 12.0 GB)
+copy ceiling (max of before/after): 380.5 GB/s  = MBU denominator (read+write stream)
+
+shape        kernel          ms       GB/s     MBU%   max-rel-err
+8192x8192    naive       6.7918       39.5     10.4   4.91e-04
+8192x8192    online      0.7013      382.8    100.6   4.88e-04
+
+4096x32768   naive      17.7809       30.2      7.9   5.03e-04
+4096x32768   online      1.7366      309.2     81.3   4.88e-04
+
+1024x131072  naive      70.0879        7.7      2.0   3.08e-04
+1024x131072  online      2.1272      252.4     66.3   2.98e-04
+
+done. all kernels passed the double-precision correctness check.

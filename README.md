@@ -1,10 +1,11 @@
 # membound
 
-Hand-written **FP16 GEMV and online-softmax CUDA kernels** pushed to **99.6%
-and 98.1% of measured memory bandwidth**, profiled with Nsight Compute at
-every stage. Zero dependencies beyond the CUDA toolkit; every benchmarked
-kernel is correctness-checked against a double-precision reference on every
-run.
+Hand-written **CUDA kernels for batch-1 LLM decode** — FP16 GEMV at **99.6%
+of measured memory bandwidth**, online softmax at **98.1%**, and INT8/INT4
+dequant GEMV turning compression ratio into **2×/3.9× tokens/s** — profiled
+with Nsight Compute at every stage. Zero dependencies beyond the CUDA
+toolkit; every benchmarked kernel is correctness-checked against a
+double-precision reference on every run.
 
 ```
 pure-read ceiling (max of before/after): 419.4 GB/s  = MBU denominator
@@ -126,6 +127,50 @@ subnormal, where relative precision collapses by construction — the error
 metric scores relative to `max(ref, 1e-4)` so real errors fail loudly while
 subnormal rounding noise doesn't produce false alarms.
 
+## The kernel decode actually runs: dequant GEMV
+
+`src/dequant.cu` — once GEMV sits at the bandwidth limit, the only way to get
+more tokens/s is to move fewer bytes. Quantized weights convert compression
+ratio directly into decode speed — *if* the dequant kernel holds the same MBU
+as the FP16 one. This benchmark tests exactly that claim: INT8 (symmetric
+per-row scale) and INT4 (symmetric per-group-of-128 scales, AWQ/GGUF-style
+granularity) weights streamed from DRAM, dequantized in-register, FP32
+accumulate, with the FP16 `vec` kernel in the same binary as the baseline.
+
+| shape      | kernel | ms     | MBU% | × fp16    |
+|------------|--------|--------|------|-----------|
+| 8192×8192  | fp16   | 0.3215 | 99.5 | 1.00×     |
+| 8192×8192  | q8     | 0.1749 | 91.5 | 1.84×     |
+| 8192×8192  | q4     | 0.0916 | 90.1 | 3.51×     |
+| 14336×4096 | fp16   | 0.3441 | 81.4 | 1.00×     |
+| 14336×4096 | q8     | 0.1668 | 84.1 | **2.06×** |
+| 14336×4096 | q4     | 0.0875 | 82.6 | **3.93×** |
+
+The dequant kernels hold within a few points of the FP16 kernel's MBU, so the
+speedup tracks the compression ratio: **~2× for INT8, ~3.5–3.9× for INT4**
+(INT4's ratio is 3.76×, not 4× — the group scales cost 1/64th of the weight
+bytes, and the harness counts them). The speedup column is also
+clock-independent — each shape's three kernels run back-to-back at the same
+power state, so it stays honest even on later shapes where laptop thermal
+throttling drags every kernel's absolute MBU down together.
+
+Correctness here is checked against a double-precision reference computed on
+the *dequantized* weights (`q·s` exactly), so it verifies the kernel's
+arithmetic and indexing; quantization error itself is a modeling choice, and
+is reported separately (`quant rmse`: 2.3e-3 for q8, 4.1e-2 for q4 on
+U[−1,1] weights).
+
+## A note on the AMD side
+
+These kernels are CUDA on an Ada laptop GPU, because that is the hardware on
+my desk. Nothing in the method is NVIDIA-specific: the levers (coalesced
+sector-efficient loads, wide vector transactions, occupancy vs. register
+pressure, measured-not-quoted ceilings, MBU as the metric) map directly onto
+CDNA — 64-lane wavefronts, `dwordx4` loads, LDS staging, and
+`s_memrealtime`-based probing on an MI300X. The kernels were written to be
+retuned, not ported line-by-line: the benchmark harness and its methodology
+are the transferable asset.
+
 ## Correctness
 
 Every kernel is checked against a double-precision CPU reference **on every
@@ -144,6 +189,7 @@ cmake --build build
 ./build/membound              # GEMV benchmark + correctness
 ./build/membound --profile    # each kernel launches exactly once, for ncu
 ./build/membound-softmax      # softmax benchmark + correctness
+./build/membound-dequant      # INT8/INT4 dequant GEMV vs fp16 baseline
 ```
 
 Profiling (GPU perf counters need admin on Windows, or the driver toggle):
