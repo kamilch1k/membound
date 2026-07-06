@@ -32,7 +32,11 @@ whose traffic is ~100% reads: `M·N·2` bytes read, `4·M` written).
 ## Results
 
 RTX 4080 Laptop GPU (Ada, sm_89, 58 SMs), CUDA 13.3, Windows 11, plugged in.
-Shapes are typical decode projections (Llama-family attention/MLP sizes).
+`artifacts/` holds a complete regenerated run (benchmarks + Nsight CSVs);
+absolute numbers move a few percent run-to-run with laptop power/thermal
+state, which is why every MBU figure is normalized to a ceiling measured in
+the same run. Shapes are typical decode projections (Llama-family
+attention/MLP sizes).
 100 timed iterations after 20 warmup; weights rotate through ≥256 MB of copies
 so every iteration streams cold data from DRAM (see gotcha #1).
 

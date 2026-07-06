@@ -1,0 +1,70 @@
+==PROF== Connected to process 30384 (C:\cc\membound\build\membound-dequant.exe)
+==PROF== Disconnected from process 30384
+device: NVIDIA GeForce RTX 4080 Laptop GPU  (sm_89, 58 SMs, 12.0 GB)
+4096x4096 fp16: correct (max rel err 1.02e-05), launched once for ncu
+4096x4096 q8: correct (max rel err 3.99e-06), launched once for ncu
+4096x4096 q4: correct (max rel err 2.72e-06), launched once for ncu
+
+8192x8192 fp16: correct (max rel err 1.86e-05), launched once for ncu
+8192x8192 q8: correct (max rel err 7.53e-06), launched once for ncu
+8192x8192 q4: correct (max rel err 8.24e-06), launched once for ncu
+
+14336x4096 fp16: correct (max rel err 1.04e-05), launched once for ncu
+14336x4096 q8: correct (max rel err 3.83e-06), launched once for ncu
+14336x4096 q4: correct (max rel err 3.39e-06), launched once for ncu
+
+4096x14336 fp16: correct (max rel err 2.33e-05), launched once for ncu
+4096x14336 q8: correct (max rel err 1.17e-05), launched once for ncu
+4096x14336 q4: correct (max rel err 6.08e-06), launched once for ncu
+
+
+done. all kernels passed the double-precision correctness check.
+"ID","Process ID","Process Name","Host Name","Kernel Name","Context","Stream","Block Size","Grid Size","Device","CC","Section Name","Metric Name","Metric Unit","Metric Value"
+"0","30384","membound-dequant.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","95.69"
+"0","30384","membound-dequant.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","16"
+"0","30384","membound-dequant.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","1.90"
+"0","30384","membound-dequant.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","81.25"
+"1","30384","membound-dequant.exe","127.0.0.1","gemv_q8(const signed char *, const float *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","92.51"
+"1","30384","membound-dequant.exe","127.0.0.1","gemv_q8(const signed char *, const float *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","25.64"
+"1","30384","membound-dequant.exe","127.0.0.1","gemv_q8(const signed char *, const float *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","3.20"
+"1","30384","membound-dequant.exe","127.0.0.1","gemv_q8(const signed char *, const float *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","86.65"
+"2","30384","membound-dequant.exe","127.0.0.1","gemv_q4(const unsigned char *, const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","86.29"
+"2","30384","membound-dequant.exe","127.0.0.1","gemv_q4(const unsigned char *, const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","24.17"
+"2","30384","membound-dequant.exe","127.0.0.1","gemv_q4(const unsigned char *, const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","7.10"
+"2","30384","membound-dequant.exe","127.0.0.1","gemv_q4(const unsigned char *, const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","80.61"
+"3","30384","membound-dequant.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1024, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","97.12"
+"3","30384","membound-dequant.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1024, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","16"
+"3","30384","membound-dequant.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1024, 1, 1)","0","8.9","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","0.93"
+"3","30384","membound-dequant.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1024, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","95.33"
+"4","30384","membound-dequant.exe","127.0.0.1","gemv_q8(const signed char *, const float *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1024, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","95.58"
+"4","30384","membound-dequant.exe","127.0.0.1","gemv_q8(const signed char *, const float *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1024, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","26.14"
+"4","30384","membound-dequant.exe","127.0.0.1","gemv_q8(const signed char *, const float *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1024, 1, 1)","0","8.9","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","1.79"
+"4","30384","membound-dequant.exe","127.0.0.1","gemv_q8(const signed char *, const float *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1024, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","96.93"
+"5","30384","membound-dequant.exe","127.0.0.1","gemv_q4(const unsigned char *, const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1024, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","95.20"
+"5","30384","membound-dequant.exe","127.0.0.1","gemv_q4(const unsigned char *, const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1024, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","24.17"
+"5","30384","membound-dequant.exe","127.0.0.1","gemv_q4(const unsigned char *, const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1024, 1, 1)","0","8.9","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","4.23"
+"5","30384","membound-dequant.exe","127.0.0.1","gemv_q4(const unsigned char *, const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1024, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","94.79"
+"6","30384","membound-dequant.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1792, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","97.06"
+"6","30384","membound-dequant.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1792, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","16.00"
+"6","30384","membound-dequant.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1792, 1, 1)","0","8.9","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","0.84"
+"6","30384","membound-dequant.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1792, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","94.41"
+"7","30384","membound-dequant.exe","127.0.0.1","gemv_q8(const signed char *, const float *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1792, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","95.97"
+"7","30384","membound-dequant.exe","127.0.0.1","gemv_q8(const signed char *, const float *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1792, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","25.64"
+"7","30384","membound-dequant.exe","127.0.0.1","gemv_q8(const signed char *, const float *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1792, 1, 1)","0","8.9","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","1.07"
+"7","30384","membound-dequant.exe","127.0.0.1","gemv_q8(const signed char *, const float *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1792, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","98.61"
+"8","30384","membound-dequant.exe","127.0.0.1","gemv_q4(const unsigned char *, const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1792, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","93.83"
+"8","30384","membound-dequant.exe","127.0.0.1","gemv_q4(const unsigned char *, const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1792, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","24.17"
+"8","30384","membound-dequant.exe","127.0.0.1","gemv_q4(const unsigned char *, const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1792, 1, 1)","0","8.9","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","3.09"
+"8","30384","membound-dequant.exe","127.0.0.1","gemv_q4(const unsigned char *, const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(1792, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","93.44"
+"9","30384","membound-dequant.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","97.00"
+"9","30384","membound-dequant.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","16"
+"9","30384","membound-dequant.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","1.68"
+"9","30384","membound-dequant.exe","127.0.0.1","gemv_vec(const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","88.63"
+"10","30384","membound-dequant.exe","127.0.0.1","gemv_q8(const signed char *, const float *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","96.11"
+"10","30384","membound-dequant.exe","127.0.0.1","gemv_q8(const signed char *, const float *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","26.36"
+"10","30384","membound-dequant.exe","127.0.0.1","gemv_q8(const signed char *, const float *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","3.10"
+"10","30384","membound-dequant.exe","127.0.0.1","gemv_q8(const signed char *, const float *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","86.02"
+"11","30384","membound-dequant.exe","127.0.0.1","gemv_q4(const unsigned char *, const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed","%","93.84"
+"11","30384","membound-dequant.exe","127.0.0.1","gemv_q4(const unsigned char *, const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","24.17"
+"11","30384","membound-dequant.exe","127.0.0.1","gemv_q4(const unsigned char *, const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","6.64"
+"11","30384","membound-dequant.exe","127.0.0.1","gemv_q4(const unsigned char *, const __half *, const __half *, float *, int, int)","1","7","(32, 8, 1)","(512, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","82.82"
